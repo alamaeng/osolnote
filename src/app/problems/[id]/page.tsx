@@ -51,7 +51,7 @@ export default async function ProblemDetailPage({ params }: PageProps) {
 
                     {problem.image1 && (
                         <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex justify-center">
-                            <img src={problem.image1} alt="Problem" className="max-h-[500px] w-1/2 rounded shadow-sm mx-auto" style={{ maxWidth: '50%', width: '50%' }} />
+                            <img src={problem.image1} alt="Problem" className="max-h-[500px] w-1/4 rounded shadow-sm mx-auto" style={{ maxWidth: '25%', width: '25%' }} />
                         </div>
                     )}
 

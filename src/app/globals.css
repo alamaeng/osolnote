@@ -12,6 +12,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+.math-renderer img {
+  width: 25% !important;
+  max-width: 25% !important;
+  height: auto !important;
+  display: block;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

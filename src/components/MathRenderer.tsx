@@ -21,10 +21,10 @@ export default function MathRenderer({ content, className }: MathRendererProps &
                     img: ({ node, ...props }) => (
                         <img
                             {...props}
-                            className="w-1/2 h-auto block"
+                            className="w-1/4 h-auto block"
                             style={{
-                                width: '50%',
-                                maxWidth: '50%',
+                                width: '25%',
+                                maxWidth: '25%',
                                 height: 'auto',
                                 display: 'block'
                             }}
