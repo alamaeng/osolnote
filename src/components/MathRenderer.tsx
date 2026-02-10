@@ -19,7 +19,17 @@ export default function MathRenderer({ content, className }: MathRendererProps &
                 components={{
                     // Custom components if needed, e.g. images
                     img: ({ node, ...props }) => (
-                        <img {...props} style={{ width: '50%', height: 'auto' }} alt={props.alt || 'image'} />
+                        <img
+                            {...props}
+                            className="w-1/2 h-auto block"
+                            style={{
+                                width: '50%',
+                                maxWidth: '50%',
+                                height: 'auto',
+                                display: 'block'
+                            }}
+                            alt={props.alt || 'image'}
+                        />
                     ),
                     p: ({ node, ...props }) => (
                         <p {...props} className="mb-6 last:mb-0 text-black dark:text-white" />
