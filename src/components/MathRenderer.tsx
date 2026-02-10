@@ -12,7 +12,7 @@ interface MathRendererProps {
 
 export default function MathRenderer({ content, className }: MathRendererProps & { className?: string }) {
     return (
-        <div className={`w-full text-black dark:text-white leading-relaxed font-semibold ${className || 'text-xl'}`}>
+        <div className={`w-full text-black dark:text-white leading-relaxed font-semibold math-renderer ${className || 'text-xl'}`}>
             <ReactMarkdown
                 remarkPlugins={[remarkMath, remarkBreaks]}
                 rehypePlugins={[rehypeKatex]}
