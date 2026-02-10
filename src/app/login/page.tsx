@@ -36,7 +36,6 @@ export default function LoginPage() {
                             name="username"
                             type="text"
                             required
-                            required
                             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
                             placeholder="이름을 입력하세요"
                         />
@@ -50,7 +49,6 @@ export default function LoginPage() {
                             id="password"
                             name="password"
                             type="password"
-                            required
                             required
                             className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
                             placeholder="비밀번호를 입력하세요"
