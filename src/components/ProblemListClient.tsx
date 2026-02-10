@@ -119,27 +119,27 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
             <div className="grid gap-6">
                 {filteredProblems.map((problem) => (
                     <div key={problem.id} className="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md border dark:border-gray-700 hover:border-indigo-500 transition-colors relative">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="flex space-x-2">
-                                <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full">
+                        <div className="flex flex-wrap justify-between items-start gap-y-2 mb-4">
+                            <div className="flex flex-wrap gap-2">
+                                <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full whitespace-nowrap">
                                     {problem.domain || '기타'}
                                 </span>
                                 {problem.source && (
-                                    <span className="inline-block px-3 py-1 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full">
+                                    <span className="inline-block px-3 py-1 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap">
                                         {problem.source}
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-2 ml-auto">
                                 {isLoggedIn && (
-                                    <div className="z-10">
+                                    <div className="z-10 bg-white dark:bg-gray-900 rounded-lg">
                                         <BookmarkButton
                                             problemId={problem.id}
                                             initialIsBookmarked={bookmarkedSet.has(problem.id)}
                                         />
                                     </div>
                                 )}
-                                <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                                <span className="text-gray-500 dark:text-gray-400 text-sm font-medium whitespace-nowrap">
                                     {problem.score}점
                                 </span>
                             </div>
