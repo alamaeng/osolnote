@@ -145,8 +145,8 @@ export default function PrintPageClient({ problems, username }: PrintPageClientP
                                                 <MathRenderer content={problem.body} className="print-content" />
                                             </div>
                                             {problem.image1 && (
-                                                <div className="mb-2 max-w-sm">
-                                                    <img src={problem.image1} alt="Problem" className="rounded border" />
+                                                <div className="mb-2 flex justify-center">
+                                                    <img src={problem.image1} alt="Problem" className="rounded border w-1/4" style={{ width: '25%', maxWidth: '25%' }} />
                                                 </div>
                                             )}
                                         </div>
