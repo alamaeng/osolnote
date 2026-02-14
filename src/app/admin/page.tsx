@@ -134,6 +134,113 @@ export default function AdminPage() {
         )
     }
 
+
+    function refineLatex(text: string): string {
+        let refined = text;
+
+        // 1. Merge adjacent LaTeX expressions (e.g., $A$=$B$ -> $A=B$)
+        // Remove spaces between dollars if they are adjacent or separated by operators
+        // Heuristic: Replace "dollar space operator space dollar" with "operator"
+        // But simpler: just remove "dollar space dollar" first to merge things like $A$ $B$ -> $AB$ if desired?
+        // No, we want to merge $A$=$B$ -> $A=B$.
+        // Regex: Find $...$ then [operator] then $...$ and merge them.
+        // A safer, more general approach for the user's request "$P$=$x...":
+        // Pattern: $(...)$ [op] $(...)$ -> $(... op ...)$
+        // We can just strip the inner dollars.
+        // Replace `$\s*([\+\-\=])\s*\$` with `$1`
+        refined = refined.replace(/\$\s*([\+\-\=])\s*\$/g, '$1');
+
+        // Also merge simple adjacent like `$A$$B$` -> `$AB$`
+        refined = refined.replace(/\$\s*\$/g, '');
+
+        // 2. Wrap standalone numbers/math in LaTeX
+        // This is risky if we match too much.
+        // Heuristic: Find words that start with a digit, or single letters like x, y, z followed by numbers/operators,
+        // which are NOT already inside $...$.
+        // A visual pass might be better, but let's try a regex for obvious cases.
+        // Detect "starting with number, maybe having decimals, maybe followed by x,y,z"
+        // Limit to things that look strictly like math terms: e.g. "25x^2" or "30x" or "8"
+        // Regex: \b\d+[a-zA-Z]*(\^[0-9]+)?\b
+        // We must ensure we don't double-wrap.
+        // Strategy: Split by existing LaTeX blocks, process text parts, rejoin.
+
+        const parts = refined.split(/(\$[^$]+\$)/g);
+        const processedParts = parts.map((part) => {
+            if (part.startsWith('$')) return part; // It's a LaTeX block, leave it
+
+            // Process plain text part
+            // 1. Wrap patterns like 25x^2, 30x, 8, x^4
+            // Regex identifying math terms:
+            // \d+ (numbers)
+            // [a-z][0-9]* (variables like x, x2)
+            // [a-z]\^[0-9]+ (power)
+            // [0-9]+[a-z](\^[0-9]+)? (coeff + var + power)
+
+            // Let's look for tokens that contain digits or ^ or operators, but aren't just normal words.
+            // A simple approach for the user's specific case:
+            // replace \b(\d+[a-z]?(\^[0-9]+)?)\b with $$1$
+            // replace \b([a-z]\^[0-9]+)\b with $$1$
+
+            let p = part;
+
+            // Numbers with optional variable and power: 25x^2, 30x, 8
+            p = p.replace(/\b(\d+[a-zA-Z]?(\^\{?\d+\}?)?)\b/g, (match) => {
+                // Avoid wrapping if it already looks like it might be part of a word? 
+                // \b handles word boundaries.
+                return `$${match}$`;
+            });
+
+            // Variables with power: x^4, x^3
+            // But wait, the previous regex \b([a-z]\^[0-9]+)\b might overlap.
+            // Let's do a second pass for things starting with letters if not wrapped.
+            // Note: If 25x^2 was wrapped, it is now $25x^2$. 
+            // We should be careful not to wrap inside the newly added $...$.
+
+            // Actually, simpler:
+            // Just regex replace all desired patterns that are NOT surrounded by $.
+            // But since we split by $, 'p' is strictly NON-LaTeX text.
+            // So we can safely wrap anything we find in here.
+
+            // Refined Regex for typical math terms in this context:
+            // 1. Number optionally followed by variables and powers: 25x^2, 100, 8
+            // 2. Variables optionally followed by powers: x^4, y
+            // But "a" might be a word "a". "I" is a word.
+            // Let's be conservative: Only wrap if it has numbers or symbols like ^.
+            // OR if it is x, y, z, a, b, c specifically?
+
+            // User example: x^4, 8x^3, 25x^2, 30x, 8
+            // These all have numbers or ^.
+
+            // Pass 1: Terms with numbers or ^
+            p = p.replace(/(?<!\$)\b([a-zA-Z0-9]+(\^\{?\d+\}?)+|[0-9]+[a-zA-Z]\w*|[0-9]+)\b(?!\$)/g, (match) => {
+                // Determine if it's likely math
+                // If it's just a number like "2024", maybe it's a year? 
+                // Context matters. For now, wrap it.
+                // If it's just "8", wrap it.
+                // If it's "x", we missed it with this regex. 
+                return `$${match}$`;
+            });
+
+            return p;
+        });
+
+        refined = processedParts.join('');
+
+        // Cleanup: merge newly created adjacent blocks if any
+        refined = refined.replace(/\$\s*([\+\-\=])\s*\$/g, '$1');
+        refined = refined.replace(/\$\s*\$/g, '');
+
+        return refined;
+    }
+
+    const handleAutoFormat = (field: 'body' | 'solution') => {
+        const form = document.querySelector('form') as HTMLFormElement;
+        const textarea = form.elements.namedItem(field) as HTMLTextAreaElement;
+        if (textarea) {
+            textarea.value = refineLatex(textarea.value);
+        }
+    };
+
     return (
         <div className="max-w-5xl mx-auto p-8">
             <div className="flex justify-between items-center mb-8">
@@ -239,7 +346,12 @@ export default function AdminPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">문제 본문 (Markdown + LaTeX)</label>
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-black">문제 본문 (Markdown + LaTeX)</label>
+                                <button type="button" onClick={() => handleAutoFormat('body')} className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                    ✨ 수식 자동 정리 (Format)
+                                </button>
+                            </div>
                             <textarea
                                 name="body"
                                 defaultValue={editingProblem?.body || ''}
@@ -250,7 +362,12 @@ export default function AdminPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">해설 (Solution)</label>
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-black">해설 (Solution)</label>
+                                <button type="button" onClick={() => handleAutoFormat('solution')} className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                    ✨ 수식 자동 정리 (Format)
+                                </button>
+                            </div>
                             <textarea
                                 name="solution"
                                 defaultValue={editingProblem?.solution || ''}
