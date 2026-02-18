@@ -272,3 +272,28 @@ export async function getBookmarkedProblems(username: string) {
 
     return problems
 }
+
+export async function bulkCreateProblems(problems: any[]) {
+    if (!problems || !Array.isArray(problems) || problems.length === 0) {
+        return { error: '데이터가 없습니다.' }
+    }
+
+    try {
+        const { error } = await supabase
+            .from('problems')
+            .insert(problems)
+
+        if (error) {
+            console.error('Bulk Insert Error:', error)
+            return { error: '일괄 등록 중 오류가 발생했습니다: ' + error.message }
+        }
+
+        revalidatePath('/admin')
+        revalidatePath('/problems')
+        return { success: `${problems.length}개의 문제가 성공적으로 등록되었습니다.` }
+    } catch (e: unknown) {
+        let message = '알 수 없는 오류가 발생했습니다.'
+        if (e instanceof Error) message = e.message
+        return { error: message }
+    }
+}

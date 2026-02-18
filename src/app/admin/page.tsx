@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createProblem, updateProblem, deleteProblem, getAdminProblems } from '@/app/actions/problem'
+import { createProblem, updateProblem, deleteProblem, getAdminProblems, bulkCreateProblems } from '@/app/actions/problem'
+import * as XLSX from 'xlsx'
 
 // Define a type for the problem to avoid implicit any
 type Problem = {
@@ -22,7 +23,7 @@ type Problem = {
 export default function AdminPage() {
     const [password, setPassword] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [mode, setMode] = useState<'create' | 'list' | 'edit'>('list')
+    const [mode, setMode] = useState<'create' | 'list' | 'edit' | 'bulk'>('list')
     const [message, setMessage] = useState<string | null>(null)
 
     // Data for editing
@@ -44,6 +45,63 @@ export default function AdminPage() {
     async function fetchProblems() {
         const data = await getAdminProblems()
         setProblems(data)
+    }
+
+    // Bulk upload handlers
+    const downloadTemplate = () => {
+        const ws = XLSX.utils.json_to_sheet([
+            {
+                subject: '수학',
+                domain: '미적분',
+                title: '2024년 6월 30번',
+                body: '함수 $f(x)$에 대하여...',
+                source: '2024 6월 모의고사',
+                answer: '15',
+                score: 4,
+                difficulty: 5,
+                solution: '풀이 과정...'
+            }
+        ])
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, 'Template')
+        XLSX.writeFile(wb, 'problem_upload_template.xlsx')
+    }
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = async (evt) => {
+            try {
+                const bstr = evt.target?.result
+                const wb = XLSX.read(bstr, { type: 'binary' })
+                const wsname = wb.SheetNames[0]
+                const ws = wb.Sheets[wsname]
+                const data = XLSX.utils.sheet_to_json(ws)
+
+                if (data.length === 0) {
+                    alert('데이터가 없습니다.')
+                    return
+                }
+
+                if (confirm(`${data.length}개의 문제를 일괄 등록하시겠습니까?`)) {
+                    setMessage('등록 처리 중...')
+                    const result = await bulkCreateProblems(data)
+                    if (result.error) setMessage(result.error)
+                    else {
+                        setMessage(result.success || '일괄 등록 성공')
+                        alert(result.success)
+                        fetchProblems()
+                        setMode('list')
+                    }
+                }
+            } catch (err) {
+                console.error(err)
+                setMessage('파일 처리 중 오류가 발생했습니다.')
+            }
+        }
+        reader.readAsBinaryString(file)
     }
 
     // Sorting logic
@@ -261,6 +319,12 @@ export default function AdminPage() {
                     >
                         문제 등록
                     </button>
+                    <button
+                        onClick={() => { setMode('bulk'); setEditingProblem(null); setMessage(null); }}
+                        className={`px-4 py-2 rounded ${mode === 'bulk' ? 'bg-black text-white' : 'bg-gray-200 text-gray-800'}`}
+                    >
+                        엑셀 일괄 등록
+                    </button>
                 </div>
             </div>
 
@@ -468,9 +532,49 @@ export default function AdminPage() {
                             )}
                         </div>
                     </form>
-                </div >
-            )
-            }
+                </div>
+            )}
+
+            {mode === 'bulk' && (
+                <div className="bg-white p-8 rounded shadow">
+                    <h2 className="text-2xl font-bold mb-6 text-black">문제 일괄 등록 (Excel)</h2>
+
+                    <div className="mb-8">
+                        <p className="mb-2 text-gray-700">1. 아래 템플릿을 다운로드하여 양식에 맞춰 문제를 입력하세요.</p>
+                        <button
+                            onClick={downloadTemplate}
+                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                        >
+                            템플릿 다운로드 (.xlsx)
+                        </button>
+                    </div>
+
+                    <div className="mb-8 pl-4 border-l-4 border-indigo-500">
+                        <p className="mb-2 text-gray-700 font-medium">2. 작성된 엑셀 파일을 업로드하세요.</p>
+                        <input
+                            type="file"
+                            accept=".xlsx, .xls"
+                            onChange={handleFileUpload}
+                            className="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-indigo-50 file:text-indigo-700
+                                hover:file:bg-indigo-100 cursor-pointer"
+                        />
+                    </div>
+
+                    <div className="bg-gray-50 p-6 rounded-lg text-sm text-gray-600 border border-gray-200">
+                        <h3 className="font-bold mb-2 text-base text-gray-800">주의사항</h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>이미지</strong>는 엑셀로 업로드할 수 없습니다. 일괄 등록 후 개별 수정에서 이미지를 추가해주세요.</li>
+                            <li><strong>난이도</strong>는 1~5 사이의 정수로 입력해주세요.</li>
+                            <li>첫 번째 행(헤더)은 변경하지 마세요.</li>
+                            <li>LaTeX 수식은 <code>$</code>로 감싸야 합니다 (예: <code>$x^2$</code>).</li>
+                        </ul>
+                    </div>
+                </div>
+            )}
         </div >
     )
 }
