@@ -13,7 +13,7 @@ export default async function ProblemListPage() {
     // Fetch problems
     const { data: problems, error } = await supabase
         .from('problems')
-        .select('id, domain, body, source, score, created_at')
+        .select('id, subject, domain, title, body, source, score, difficulty, created_at')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -29,9 +29,12 @@ export default async function ProblemListPage() {
     // Ensure types match
     const formattedProblems = problems?.map(p => ({
         ...p,
+        subject: p.subject || null,
         domain: p.domain || null,
+        title: p.title || null,
         source: p.source || null,
-        score: p.score || 0
+        score: p.score || 0,
+        difficulty: p.difficulty || null
     })) || []
 
     return (
