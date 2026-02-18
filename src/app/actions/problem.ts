@@ -79,8 +79,10 @@ export async function createProblem(formData: FormData) {
         revalidatePath('/admin')
         revalidatePath('/problems')
         return { success: '문제가 성공적으로 등록되었습니다.' }
-    } catch (e: any) {
-        return { error: e.message }
+    } catch (e: unknown) {
+        let message = '알 수 없는 오류가 발생했습니다.'
+        if (e instanceof Error) message = e.message
+        return { error: message }
     }
 }
 
@@ -115,7 +117,16 @@ export async function updateProblem(formData: FormData) {
         }
 
         // Prepare update object
-        const updateData: any = {
+        const updateData: {
+            domain: string
+            body: string
+            source: string
+            answer: string
+            score: number
+            solution: string
+            image1?: string | null
+            image2?: string | null
+        } = {
             domain,
             body,
             source,
@@ -151,8 +162,10 @@ export async function updateProblem(formData: FormData) {
         revalidatePath(`/problems/${id}`)
         revalidatePath('/problems')
         return { success: '문제가 성공적으로 수정되었습니다.' }
-    } catch (e: any) {
-        return { error: e.message }
+    } catch (e: unknown) {
+        let message = '알 수 없는 오류가 발생했습니다.'
+        if (e instanceof Error) message = e.message
+        return { error: message }
     }
 }
 
@@ -194,8 +207,8 @@ export async function getWrongProblemsForUser(username: string) {
 
     // 3. Filter for problems where the latest attempt was WRONG (false)
     const wrongProblemIds = Array.from(latestStatus.entries())
-        .filter(([_, isCorrect]) => !isCorrect)
-        .map(([id, _]) => id)
+        .filter(([, isCorrect]) => !isCorrect)
+        .map(([id]) => id)
 
     if (wrongProblemIds.length === 0) {
         return []

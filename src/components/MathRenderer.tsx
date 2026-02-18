@@ -18,20 +18,17 @@ export default function MathRenderer({ content, className }: MathRendererProps &
                 rehypePlugins={[rehypeKatex]}
                 components={{
                     // Custom components if needed, e.g. images
-                    img: ({ node, ...props }) => (
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                    img: ({ node, ...props }: any) => (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                             {...props}
-                            className="w-1/4 h-auto block"
-                            style={{
-                                width: '25%',
-                                maxWidth: '25%',
-                                height: 'auto',
-                                display: 'block'
-                            }}
+                            className="w-1/4 max-w-[25%] h-auto block"
                             alt={props.alt || 'image'}
                         />
                     ),
-                    p: ({ node, ...props }) => (
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                    p: ({ node, ...props }: any) => (
                         <p {...props} className="mb-6 last:mb-0 text-black dark:text-white" />
                     )
                 }}

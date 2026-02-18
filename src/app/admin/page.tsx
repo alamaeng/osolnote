@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createProblem, updateProblem, deleteProblem, getAdminProblems } from '@/app/actions/problem'
 
 // Define a type for the problem to avoid implicit any
@@ -341,7 +341,7 @@ export default function AdminPage() {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-black">배점 (Score)</label>
-                                <input name="score" type="number" defaultValue={editingProblem?.score || 4} className="w-full p-2 border rounded bg-white text-black" />
+                                <input name="score" type="number" defaultValue={editingProblem?.score || 4} className="w-full p-2 border rounded bg-white text-black" aria-label="배점" />
                             </div>
                         </div>
 
@@ -384,6 +384,7 @@ export default function AdminPage() {
                                     name="image1"
                                     accept="image/*"
                                     className="w-full p-2 border rounded bg-white text-black"
+                                    aria-label="문제 이미지 업로드"
                                     onChange={(e) => {
                                         const file = e.target.files?.[0];
                                         if (file && file.size > 2 * 1024 * 1024) {
@@ -396,7 +397,7 @@ export default function AdminPage() {
                                     <div className="mt-1 flex items-center space-x-2">
                                         <p className="text-xs text-gray-500 overflow-hidden truncate max-w-[150px]">{editingProblem.image1}</p>
                                         <label className="flex items-center space-x-1 text-xs text-red-600 cursor-pointer">
-                                            <input type="checkbox" name="delete_image1" value="true" className="rounded text-red-600 focus:ring-red-500" />
+                                            <input type="checkbox" name="delete_image1" value="true" className="rounded text-red-600 focus:ring-red-500" aria-label="이미지 1 삭제" />
                                             <span>삭제</span>
                                         </label>
                                     </div>
@@ -409,6 +410,7 @@ export default function AdminPage() {
                                     name="image2"
                                     accept="image/*"
                                     className="w-full p-2 border rounded bg-white text-black"
+                                    aria-label="해설 이미지 업로드"
                                     onChange={(e) => {
                                         const file = e.target.files?.[0];
                                         if (file && file.size > 2 * 1024 * 1024) {
@@ -421,7 +423,7 @@ export default function AdminPage() {
                                     <div className="mt-1 flex items-center space-x-2">
                                         <p className="text-xs text-gray-500 overflow-hidden truncate max-w-[150px]">{editingProblem.image2}</p>
                                         <label className="flex items-center space-x-1 text-xs text-red-600 cursor-pointer">
-                                            <input type="checkbox" name="delete_image2" value="true" className="rounded text-red-600 focus:ring-red-500" />
+                                            <input type="checkbox" name="delete_image2" value="true" className="rounded text-red-600 focus:ring-red-500" aria-label="이미지 2 삭제" />
                                             <span>삭제</span>
                                         </label>
                                     </div>

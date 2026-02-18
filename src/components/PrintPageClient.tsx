@@ -93,7 +93,7 @@ export default function PrintPageClient({ problems, username }: PrintPageClientP
                 <div className="space-x-4 flex items-center">
                     <div className="flex items-center space-x-2 bg-gray-800 p-2 rounded shadow-md border border-gray-700">
                         <span className="text-sm font-bold text-white">페이지당 문제 수:</span>
-                        <select value={itemsPerPage} onChange={handleLayoutChange} className="text-sm border-0 rounded px-2 py-1 text-black bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                        <select value={itemsPerPage} onChange={handleLayoutChange} className="text-sm border-0 rounded px-2 py-1 text-black bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer" aria-label="페이지당 문제 수 선택">
                             <option value="auto">자동 (기본)</option>
                             <option value="1">1문제</option>
                             <option value="2">2문제</option>
@@ -145,8 +145,9 @@ export default function PrintPageClient({ problems, username }: PrintPageClientP
                                                 <MathRenderer content={problem.body} className="print-content" />
                                             </div>
                                             {problem.image1 && (
-                                                <div className="mb-2 flex justify-center">
-                                                    <img src={problem.image1} alt="Problem" className="rounded border w-1/4" style={{ width: '25%', maxWidth: '25%' }} />
+                                                <div className="mb-2 flex justify-center relative">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img src={problem.image1} alt="Problem" className="rounded border w-1/4 max-w-[25%]" />
                                                 </div>
                                             )}
                                         </div>

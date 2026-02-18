@@ -51,7 +51,8 @@ export default async function ProblemDetailPage({ params }: PageProps) {
 
                     {problem.image1 && (
                         <div className="mb-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg flex justify-center">
-                            <img src={problem.image1} alt="Problem" className="max-h-[500px] w-1/4 rounded shadow-sm mx-auto" style={{ maxWidth: '25%', width: '25%' }} />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={problem.image1} alt="Problem" className="max-h-[500px] w-1/4 max-w-[25%] rounded shadow-sm mx-auto" />
                         </div>
                     )}
 

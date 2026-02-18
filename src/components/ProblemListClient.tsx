@@ -73,6 +73,7 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
                             value={selectedDomain}
                             onChange={(e) => setSelectedDomain(e.target.value)}
                             className="w-40 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500"
+                            aria-label="영역 선택"
                         >
                             <option value="all">전체</option>
                             {domains.map(d => (
@@ -87,6 +88,7 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
                             value={selectedSource}
                             onChange={(e) => setSelectedSource(e.target.value)}
                             className="w-40 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-indigo-500"
+                            aria-label="출처 선택"
                         >
                             <option value="all">전체</option>
                             {sources.map(s => (
