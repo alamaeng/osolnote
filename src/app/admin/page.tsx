@@ -6,11 +6,14 @@ import { createProblem, updateProblem, deleteProblem, getAdminProblems } from '@
 // Define a type for the problem to avoid implicit any
 type Problem = {
     id: number;
+    subject: string | null;
     domain: string | null;
+    title: string | null;
     body: string;
     source: string | null;
     answer: string;
     score: number | null;
+    difficulty: number | null;
     solution: string | null;
     image1: string | null;
     image2: string | null;
@@ -272,12 +275,14 @@ export default function AdminPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">과목</th>
                                 <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('domain')}
                                 >
                                     영역 {sortConfig?.key === 'domain' && (sortConfig.direction === 'ascending' ? '▲' : '▼')}
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">문제 제목</th>
                                 <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('score')}
@@ -297,7 +302,9 @@ export default function AdminPage() {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {sortedProblems.map((p) => (
                                 <tr key={p.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.subject}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.domain}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.title}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{p.score}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.source}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{p.body}</td>
@@ -328,12 +335,24 @@ export default function AdminPage() {
 
                         <div className="grid grid-cols-2 gap-6">
                             <div>
+                                <label className="block text-sm font-medium mb-1 text-black">과목 (Subject)</label>
+                                <input name="subject" defaultValue={editingProblem?.subject || ''} className="w-full p-2 border rounded bg-white text-black" placeholder="예: 국어, 수학" />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium mb-1 text-black">영역 (Domain)</label>
                                 <input name="domain" defaultValue={editingProblem?.domain || ''} className="w-full p-2 border rounded bg-white text-black" placeholder="예: 미적분" />
+                            </div>
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium mb-1 text-black">문제 제목 (Title)</label>
+                                <input name="title" defaultValue={editingProblem?.title || ''} className="w-full p-2 border rounded bg-white text-black" placeholder="예: 2024년 6월 모의고사 30번" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-black">출처 (Source)</label>
                                 <input name="source" defaultValue={editingProblem?.source || ''} className="w-full p-2 border rounded bg-white text-black" placeholder="예: 2024 수능" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-black">난이도 (Difficulty, 1-5)</label>
+                                <input type="number" min="1" max="5" name="difficulty" defaultValue={editingProblem?.difficulty || 3} className="w-full p-2 border rounded bg-white text-black" required placeholder="1-5" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-black">정답 (Answer)</label>

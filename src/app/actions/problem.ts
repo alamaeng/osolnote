@@ -30,11 +30,14 @@ async function uploadImage(file: File): Promise<string | null> {
 }
 
 export async function createProblem(formData: FormData) {
+    const subject = formData.get('subject') as string
     const domain = formData.get('domain') as string
+    const title = formData.get('title') as string
     const body = formData.get('body') as string
     const source = formData.get('source') as string
     const answer = formData.get('answer') as string
     const score = formData.get('score') as string
+    const difficulty = formData.get('difficulty') as string
     const solution = formData.get('solution') as string
 
     // Handle file uploads
@@ -60,11 +63,14 @@ export async function createProblem(formData: FormData) {
             .from('problems')
             .insert([
                 {
+                    subject,
                     domain,
+                    title,
                     body,
                     source,
                     answer,
                     score: score ? parseInt(score) : 0,
+                    difficulty: difficulty ? parseInt(difficulty) : 0,
                     solution,
                     image1,
                     image2,
@@ -89,7 +95,7 @@ export async function createProblem(formData: FormData) {
 export async function getAdminProblems() {
     const { data: problems, error } = await supabase
         .from('problems')
-        .select('id, domain, source, created_at, body, answer, score, solution, image1, image2')
+        .select('id, subject, domain, title, source, created_at, body, answer, score, difficulty, solution, image1, image2')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -101,11 +107,14 @@ export async function getAdminProblems() {
 
 export async function updateProblem(formData: FormData) {
     const id = formData.get('id') as string
+    const subject = formData.get('subject') as string
     const domain = formData.get('domain') as string
+    const title = formData.get('title') as string
     const body = formData.get('body') as string
     const source = formData.get('source') as string
     const answer = formData.get('answer') as string
     const score = formData.get('score') as string
+    const difficulty = formData.get('difficulty') as string
     const solution = formData.get('solution') as string
 
     const image1File = formData.get('image1') as File
@@ -118,20 +127,26 @@ export async function updateProblem(formData: FormData) {
 
         // Prepare update object
         const updateData: {
+            subject: string
             domain: string
+            title: string
             body: string
             source: string
             answer: string
             score: number
+            difficulty: number
             solution: string
             image1?: string | null
             image2?: string | null
         } = {
+            subject,
             domain,
+            title,
             body,
             source,
             answer,
             score: score ? parseInt(score) : 0,
+            difficulty: difficulty ? parseInt(difficulty) : 0,
             solution,
         }
 

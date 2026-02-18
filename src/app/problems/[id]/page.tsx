@@ -28,18 +28,36 @@ export default async function ProblemDetailPage({ params }: PageProps) {
 
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border dark:border-gray-700 overflow-hidden">
                 {/* Header */}
-                <div className="p-6 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700 flex justify-between items-center">
-                    <div>
-                        <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full mb-2">
-                            {problem.domain || '기타'}
-                        </span>
-                        <h1 className="text-2xl font-bold text-black dark:text-white">
-                            문제 {problem.id}
-                        </h1>
+                <div className="p-6 bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex flex-wrap gap-2">
+                            {problem.subject && (
+                                <span className="inline-block px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 dark:bg-green-900 dark:text-green-300 rounded-full">
+                                    {problem.subject}
+                                </span>
+                            )}
+                            <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full">
+                                {problem.domain || '기타'}
+                            </span>
+                            {problem.difficulty && (
+                                <span className="inline-block px-3 py-1 text-sm font-semibold text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300 rounded-full" aria-label={`난이도 ${problem.difficulty}점`}>
+                                    {'★'.repeat(problem.difficulty)}
+                                </span>
+                            )}
+                        </div>
+                        <div className="text-right">
+                            <p className="font-bold text-lg text-black dark:text-white">{problem.score}점</p>
+                        </div>
                     </div>
-                    <div className="text-right">
-                        {/* Source is hidden until solved */}
-                        <p className="font-bold text-lg text-black dark:text-white">{problem.score}점</p>
+                    <div>
+                        <h1 className="text-2xl font-bold text-black dark:text-white mt-2">
+                            {problem.title || `문제 ${problem.id}`}
+                        </h1>
+                        {problem.source && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {problem.source}
+                            </p>
+                        )}
                     </div>
                 </div>
 

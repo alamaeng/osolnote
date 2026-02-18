@@ -8,10 +8,13 @@ import BookmarkButton from '@/components/BookmarkButton'
 
 type Problem = {
     id: number
+    subject: string | null
     domain: string | null
+    title: string | null
     body: string
     source: string | null
     score: number | null
+    difficulty: number | null
     created_at: string
 }
 
@@ -122,28 +125,47 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
                 {filteredProblems.map((problem) => (
                     <div key={problem.id} className="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md border dark:border-gray-700 hover:border-indigo-500 transition-colors relative">
                         <div className="flex flex-wrap justify-between items-start gap-y-2 mb-4">
-                            <div className="flex flex-wrap gap-2">
-                                <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full whitespace-nowrap">
-                                    {problem.domain || '기타'}
-                                </span>
-                                {problem.source && (
-                                    <span className="inline-block px-3 py-1 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap">
-                                        {problem.source}
+                            <div className="w-full">
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {problem.subject && (
+                                        <span className="inline-block px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 dark:bg-green-900 dark:text-green-300 rounded-full whitespace-nowrap">
+                                            {problem.subject}
+                                        </span>
+                                    )}
+                                    <span className="inline-block px-3 py-1 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full whitespace-nowrap">
+                                        {problem.domain || '기타'}
                                     </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2 ml-auto">
-                                {isLoggedIn && (
-                                    <div className="z-10 bg-white dark:bg-gray-900 rounded-lg">
-                                        <BookmarkButton
-                                            problemId={problem.id}
-                                            initialIsBookmarked={bookmarkedSet.has(problem.id)}
-                                        />
+                                    {problem.source && (
+                                        <span className="inline-block px-3 py-1 text-sm font-semibold text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap">
+                                            {problem.source}
+                                        </span>
+                                    )}
+                                    {problem.difficulty && (
+                                        <span className="inline-block px-3 py-1 text-sm font-semibold text-yellow-600 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300 rounded-full whitespace-nowrap" aria-label={`난이도 ${problem.difficulty}점`}>
+                                            {'★'.repeat(problem.difficulty)}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    {problem.title && (
+                                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                            {problem.title}
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        {isLoggedIn && (
+                                            <div className="z-10 bg-white dark:bg-gray-900 rounded-lg">
+                                                <BookmarkButton
+                                                    problemId={problem.id}
+                                                    initialIsBookmarked={bookmarkedSet.has(problem.id)}
+                                                />
+                                            </div>
+                                        )}
+                                        <span className="text-gray-500 dark:text-gray-400 text-sm font-medium whitespace-nowrap">
+                                            {problem.score}점
+                                        </span>
                                     </div>
-                                )}
-                                <span className="text-gray-500 dark:text-gray-400 text-sm font-medium whitespace-nowrap">
-                                    {problem.score}점
-                                </span>
+                                </div>
                             </div>
                         </div>
 
@@ -160,7 +182,6 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
                         </Link>
                     </div>
                 ))}
-
 
                 {filteredProblems.length === 0 && (
                     <div className="text-center py-12 text-gray-500 bg-white dark:bg-gray-800 rounded-lg border border-dashed dark:border-gray-700">
