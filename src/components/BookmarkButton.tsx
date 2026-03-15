@@ -7,9 +7,10 @@ import { Star } from 'lucide-react'
 interface BookmarkButtonProps {
     problemId: number
     initialIsBookmarked: boolean
+    onToggle?: (isBookmarked: boolean) => void
 }
 
-export default function BookmarkButton({ problemId, initialIsBookmarked }: BookmarkButtonProps) {
+export default function BookmarkButton({ problemId, initialIsBookmarked, onToggle }: BookmarkButtonProps) {
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked)
     const [isPending, startTransition] = useTransition()
 
@@ -17,6 +18,7 @@ export default function BookmarkButton({ problemId, initialIsBookmarked }: Bookm
         // Optimistic update
         const newState = !isBookmarked
         setIsBookmarked(newState)
+        if (onToggle) onToggle(newState)
 
         startTransition(async () => {
             const result = await toggleBookmark(problemId, isBookmarked)

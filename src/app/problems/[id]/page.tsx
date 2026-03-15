@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import MathRenderer from '@/components/MathRenderer'
 import ProblemSolver from '@/components/ProblemSolver'
-import Link from 'next/link'
+import BackButton from '@/components/BackButton'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -22,9 +22,7 @@ export default async function ProblemDetailPage({ params }: PageProps) {
 
     return (
         <div className="max-w-4xl mx-auto p-8 min-h-screen">
-            <Link href="/problems" className="inline-block mb-6 text-gray-500 hover:text-black dark:hover:text-white">
-                ← 문제 목록으로 돌아가기
-            </Link>
+            <BackButton />
 
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg border dark:border-gray-700 overflow-hidden">
                 {/* Header */}
