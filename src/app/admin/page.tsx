@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createProblem, updateProblem, deleteProblem, getAdminProblems, bulkCreateProblems } from '@/app/actions/problem'
+import { createProblem, updateProblem, deleteProblem, getAdminProblems, bulkCreateProblems, type ProblemInsert } from '@/app/actions/problem'
 import * as XLSX from 'xlsx'
 
 // Define a type for the problem to avoid implicit any
@@ -30,8 +30,8 @@ export default function AdminPage() {
     const [problems, setProblems] = useState<Problem[]>([])
     const [editingProblem, setEditingProblem] = useState<Problem | null>(null)
 
-    // Sorting state
-    const [sortConfig, setSortConfig] = useState<{ key: keyof Problem; direction: 'ascending' | 'descending' } | null>(null);
+    // Sorting state (support multiple columns)
+    const [sortConfig, setSortConfig] = useState<{ key: keyof Problem; direction: 'ascending' | 'descending' }[]>([]);
 
     const checkPassword = () => {
         if (password === 'anfruf88') {
@@ -78,7 +78,7 @@ export default function AdminPage() {
                 const wb = XLSX.read(bstr, { type: 'binary' })
                 const wsname = wb.SheetNames[0]
                 const ws = wb.Sheets[wsname]
-                const data = XLSX.utils.sheet_to_json(ws)
+                const data = XLSX.utils.sheet_to_json(ws) as ProblemInsert[]
 
                 if (data.length === 0) {
                     alert('데이터가 없습니다.')
@@ -104,28 +104,74 @@ export default function AdminPage() {
         reader.readAsBinaryString(file)
     }
 
-    // Sorting logic
-    const handleSort = (key: keyof Problem) => {
-        let direction: 'ascending' | 'descending' = 'ascending';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({ key, direction });
+    // Sorting logic (Multi-column support)
+    const handleSort = (key: keyof Problem, isShiftPressed: boolean) => {
+        setSortConfig((prevConfig) => {
+            const existingSortIndex = prevConfig.findIndex((s) => s.key === key);
+            let nextDirection: 'ascending' | 'descending' | null = 'ascending';
+
+            if (existingSortIndex >= 0) {
+                if (prevConfig[existingSortIndex].direction === 'ascending') {
+                    nextDirection = 'descending';
+                } else {
+                    nextDirection = null; // Remove sorting for this column
+                }
+            }
+
+            if (isShiftPressed) {
+                // Multi-sort (Shift + Click)
+                const newConfig = [...prevConfig];
+                if (nextDirection) {
+                    if (existingSortIndex >= 0) {
+                        newConfig[existingSortIndex].direction = nextDirection;
+                    } else {
+                        newConfig.push({ key, direction: nextDirection });
+                    }
+                } else {
+                    // Remove if toggled to null
+                    newConfig.splice(existingSortIndex, 1);
+                }
+                return newConfig;
+            } else {
+                // Single-sort (Normal Click)
+                if (nextDirection) {
+                    return [{ key, direction: nextDirection }];
+                } else {
+                    return [];
+                }
+            }
+        });
     };
 
-    const sortedProblems = [...problems].sort((a, b) => {
-        if (sortConfig !== null) {
-            if (a[sortConfig.key] === null) return 1;
-            if (b[sortConfig.key] === null) return -1;
+    const getSortIndicator = (key: keyof Problem) => {
+        const sortIndex = sortConfig.findIndex((s) => s.key === key);
+        if (sortIndex === -1) return null;
 
-            if (a[sortConfig.key]! < b[sortConfig.key]!) {
-                return sortConfig.direction === 'ascending' ? -1 : 1;
-            }
-            if (a[sortConfig.key]! > b[sortConfig.key]!) {
-                return sortConfig.direction === 'ascending' ? 1 : -1;
-            }
+        const config = sortConfig[sortIndex];
+        const arrow = config.direction === 'ascending' ? '▲' : '▼';
+        
+        // Show priority number if there are multiple sorts
+        if (sortConfig.length > 1) {
+            return `${arrow}(${sortIndex + 1})`;
         }
-        return 0;
+        return arrow;
+    };
+
+
+    const sortedProblems = [...problems].sort((a, b) => {
+        for (const config of sortConfig) {
+            const valA = a[config.key];
+            const valB = b[config.key];
+
+            if (valA === valB) continue; // If equal, move to the next sort criteria
+
+            if (valA === null || valA === undefined) return 1; // nulls last
+            if (valB === null || valB === undefined) return -1;
+
+            if (valA < valB) return config.direction === 'ascending' ? -1 : 1;
+            if (valA > valB) return config.direction === 'ascending' ? 1 : -1;
+        }
+        return 0; // All criteria equal
     });
 
     async function handleSubmit(formData: FormData) {
@@ -339,25 +385,35 @@ export default function AdminPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">과목</th>
                                 <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('domain')}
+                                    onClick={(e) => handleSort('subject', e.shiftKey)}
                                 >
-                                    영역 {sortConfig?.key === 'domain' && (sortConfig.direction === 'ascending' ? '▲' : '▼')}
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">문제 제목</th>
-                                <th
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('score')}
-                                >
-                                    배점 {sortConfig?.key === 'score' && (sortConfig.direction === 'ascending' ? '▲' : '▼')}
+                                    과목 {getSortIndicator('subject')}
                                 </th>
                                 <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                    onClick={() => handleSort('source')}
+                                    onClick={(e) => handleSort('domain', e.shiftKey)}
                                 >
-                                    출처 {sortConfig?.key === 'source' && (sortConfig.direction === 'ascending' ? '▲' : '▼')}
+                                    영역 {getSortIndicator('domain')}
+                                </th>
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={(e) => handleSort('title', e.shiftKey)}
+                                >
+                                    문제 제목 {getSortIndicator('title')}
+                                </th>
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={(e) => handleSort('score', e.shiftKey)}
+                                >
+                                    배점 {getSortIndicator('score')}
+                                </th>
+                                <th
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={(e) => handleSort('source', e.shiftKey)}
+                                >
+                                    출처 {getSortIndicator('source')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">내용 (요약)</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
@@ -555,6 +611,7 @@ export default function AdminPage() {
                             type="file"
                             accept=".xlsx, .xls"
                             onChange={handleFileUpload}
+                            aria-label="엑셀 파일 선택"
                             className="block w-full text-sm text-gray-500
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-full file:border-0

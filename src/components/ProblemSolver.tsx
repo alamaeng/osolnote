@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { checkAnswer } from '@/app/actions/solve'
+import Image from 'next/image'
 import MathRenderer from '@/components/MathRenderer'
 
 interface ProblemSolverProps {
@@ -99,7 +100,13 @@ export default function ProblemSolver({ problemId }: ProblemSolverProps) {
                             {result.solution && <MathRenderer content={result.solution} />}
                             {result.solutionImage && (
                                 <div className="mt-4">
-                                    <img src={result.solutionImage} alt="Solution" className="max-w-full rounded-lg shadow-lg" />
+                                    <Image
+                                        src={result.solutionImage}
+                                        alt="Solution"
+                                        width={800}
+                                        height={600}
+                                        className="max-w-full rounded-lg shadow-lg"
+                                    />
                                 </div>
                             )}
                             {!result.solution && !result.solutionImage && (

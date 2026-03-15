@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import Image from 'next/image'
 import { getWrongProblemsForUser } from '@/app/actions/problem'
 import { getBookmarkedProblemIds } from '@/app/actions/bookmark'
 import MathRenderer from '@/components/MathRenderer'
@@ -79,8 +80,14 @@ export default async function OsolnotePage() {
                             <MathRenderer content={problem.body} />
                             {problem.image1 && (
                                 <div className="mt-4">
-                                    {/* Use standard img for public display if simple, or updated logic */}
-                                    <img src={problem.image1} alt="Problem Image" className="max-w-full h-auto rounded border" />
+                                    <Image
+                                        src={problem.image1}
+                                        alt="Problem Image"
+                                        width={800}
+                                        height={600}
+                                        className="max-w-full h-auto rounded border"
+                                        priority={false}
+                                    />
                                 </div>
                             )}
                         </div>

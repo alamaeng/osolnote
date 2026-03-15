@@ -1,7 +1,6 @@
 'use client'
 
 import { login, signup } from '@/app/actions/auth'
-import { useActionState } from 'react' // or useFormState depending on React version, next.js 14+ uses useFormState usually, but let's stick to standard hooks if possible or use client side handling for simplicity with server actions?
 // Using simple form submission for now to avoid experimental hook confusion unless necessary.
 // Actually, `useFormState` is standard in Next 14. Let's try basic form action first.
 import { useState } from 'react'

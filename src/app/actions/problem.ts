@@ -273,7 +273,22 @@ export async function getBookmarkedProblems(username: string) {
     return problems
 }
 
-export async function bulkCreateProblems(problems: any[]) {
+// Problem interface for bulk upload
+export interface ProblemInsert {
+    subject?: string | null
+    domain?: string | null
+    title?: string | null
+    body: string
+    source?: string | null
+    answer: string
+    score?: number | null
+    difficulty?: number | null
+    solution?: string | null
+    image1?: string | null
+    image2?: string | null
+}
+
+export async function bulkCreateProblems(problems: ProblemInsert[]) {
     if (!problems || !Array.isArray(problems) || problems.length === 0) {
         return { error: '데이터가 없습니다.' }
     }
