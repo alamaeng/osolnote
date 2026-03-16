@@ -147,7 +147,7 @@ export default function PrintPageClient({ problems, username }: PrintPageClientP
                                             {problem.image1 && (
                                                 <div className="mb-2 flex justify-center relative">
                                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={problem.image1} alt="Problem" className="rounded border w-1/4 max-w-[25%]" />
+                                                    <img src={problem.image1} alt="Problem" className="rounded print:m-0 w-1/4 max-w-[25%]" />
                                                 </div>
                                             )}
                                         </div>

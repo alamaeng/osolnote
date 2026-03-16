@@ -349,7 +349,7 @@ export default function ProblemListClient({ initialProblems, initialBookmarkedId
                         </div>
 
                         <div className="max-h-24 overflow-hidden mb-4 relative mask-linear-gradient">
-                            <MathRenderer content={problem.body.substring(0, 150) + (problem.body.length > 150 ? '...' : '')} />
+                            <MathRenderer content={problem.body} />
                             <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-white dark:from-gray-900 to-transparent"></div>
                         </div>
 
