@@ -1,25 +1,72 @@
 'use client'
 
 import { useState } from 'react'
-import { checkAnswer } from '@/app/actions/solve'
+import { checkAnswer, giveUpAndShowAnswer } from '@/app/actions/solve'
 import Image from 'next/image'
 import MathRenderer from '@/components/MathRenderer'
 
 interface ProblemSolverProps {
     problemId: number
+    role: string
+    problemData: {
+        answer: string
+        solution: string | null
+        image2: string | null
+        source: string | null
+    }
 }
 
-export default function ProblemSolver({ problemId }: ProblemSolverProps) {
+export default function ProblemSolver({ problemId, role, problemData }: ProblemSolverProps) {
     const [answer, setAnswer] = useState('')
     const [result, setResult] = useState<{
         isCorrect: boolean;
-        solution: string;
-        solutionImage: string;
+        solution: string | null;
+        solutionImage: string | null;
         correctAnswer: string;
-        source: string;
-    } | null>(null)
+        source: string | null;
+    } | null>(() => {
+        if (role !== 'student') {
+            return {
+                isCorrect: true, // Treated as truthy to show the green UI box block
+                solution: problemData.solution,
+                solutionImage: problemData.image2,
+                correctAnswer: problemData.answer,
+                source: problemData.source
+            }
+        }
+        return null
+    })
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [isGivingUp, setIsGivingUp] = useState(false)
+
+    async function handleGiveUp() {
+        if (!confirm('정말 정답을 확인하시겠습니까? (오답으로 기록됩니다)')) return;
+        setLoading(true);
+        setIsGivingUp(true);
+        setError(null);
+
+        try {
+            const res = await giveUpAndShowAnswer(problemId);
+            if (res.error) {
+                setError(res.error);
+            } else if (res.success) {
+                setResult({
+                    isCorrect: res.isCorrect,
+                    solution: res.solution,
+                    solutionImage: res.solutionImage,
+                    correctAnswer: res.correctAnswer,
+                    source: res.source
+                });
+            }
+        } catch (err) {
+            setError('오류가 발생했습니다.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+            setIsGivingUp(false);
+        }
+    }
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -69,24 +116,34 @@ export default function ProblemSolver({ problemId }: ProblemSolverProps) {
 
                     {error && <div className="text-red-500 font-bold">{error}</div>}
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                        {loading ? '채점 중...' : '제출하기'}
-                    </button>
+                    <div className="flex space-x-4">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                        >
+                            {loading && !isGivingUp ? '채점 중...' : '제출하기'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleGiveUp}
+                            disabled={loading}
+                            className="px-6 py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 disabled:opacity-50"
+                        >
+                            {isGivingUp ? '확인 중...' : '정답 확인'}
+                        </button>
+                    </div>
                 </form>
             ) : (
                 <div className="space-y-6 animate-fade-in">
-                    <div className={`p-6 rounded-lg border-2 ${result.isCorrect ? 'bg-green-50 border-green-500 text-green-900' : 'bg-red-50 border-red-500 text-red-900'}`}>
+                    <div className={`p-6 rounded-lg border-2 ${(result.isCorrect || role !== 'student') ? 'bg-green-50 border-green-500 text-green-900' : 'bg-red-50 border-red-500 text-red-900'}`}>
                         <h3 className="text-2xl font-bold mb-2">
-                            {result.isCorrect ? '정답입니다! 🎉' : '틀렸습니다. 다시 도전해보세요.'}
+                            {role !== 'student' ? '정답 및 해설' : (result.isCorrect ? '정답입니다! 🎉' : '틀렸습니다. 다시 도전해보세요.')}
                         </h3>
-                        {!result.isCorrect && (
-                            <p className="font-semibold">입력한 답: {answer}</p>
+                        {!result.isCorrect && role === 'student' && (
+                            <p className="font-semibold">입력한 답: {answer || '[정답 확인]'}</p>
                         )}
-                        {result.isCorrect && (
+                        {result.correctAnswer && (
                             <div className="mt-4 space-y-2">
                                 <p><span className="font-bold">정답: {result.correctAnswer}</span></p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">출처: {result.source || '미상'}</p>
@@ -94,7 +151,7 @@ export default function ProblemSolver({ problemId }: ProblemSolverProps) {
                         )}
                     </div>
 
-                    {result.isCorrect && (
+                    {result.correctAnswer && (
                         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                             <h3 className="text-2xl font-bold mb-4 text-black dark:text-white">해설</h3>
                             {result.solution && <MathRenderer content={result.solution} />}
@@ -115,15 +172,17 @@ export default function ProblemSolver({ problemId }: ProblemSolverProps) {
                         </div>
                     )}
 
-                    <button
-                        onClick={() => {
-                            setResult(null);
-                            setAnswer('');
-                        }}
-                        className="mt-4 text-indigo-600 hover:underline"
-                    >
-                        다시 풀기
-                    </button>
+                    {role === 'student' && (
+                        <button
+                            onClick={() => {
+                                setResult(null);
+                                setAnswer('');
+                            }}
+                            className="mt-4 text-indigo-600 hover:underline"
+                        >
+                            다시 풀기
+                        </button>
+                    )}
                 </div>
             )}
         </div>

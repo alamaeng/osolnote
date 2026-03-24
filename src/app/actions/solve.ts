@@ -60,3 +60,48 @@ export async function checkAnswer(problemId: number, userAnswer: string) {
         }
     }
 }
+
+export async function giveUpAndShowAnswer(problemId: number) {
+    const cookieStore = await cookies()
+    const username = cookieStore.get('osolnote_user')?.value
+
+    if (!username) {
+        return { error: '로그인이 필요합니다.' }
+    }
+
+    // Get the problem's correct answer and solution
+    const { data: problem, error: fetchError } = await supabase
+        .from('problems')
+        .select('answer, solution, image2, source')
+        .eq('id', problemId)
+        .single()
+
+    if (fetchError || !problem) {
+        return { error: '문제를 찾을 수 없습니다.' }
+    }
+
+    // Record history as wrong, marked as given up
+    const { error: historyError } = await supabase
+        .from('solve_history')
+        .insert([
+            {
+                user_id: username,
+                problem_id: problemId,
+                user_answer: '[정답 확인]',
+                is_correct: false,
+            },
+        ])
+
+    if (historyError) {
+        console.error('History Error:', historyError)
+    }
+
+    return {
+        success: true,
+        isCorrect: false,
+        solution: problem.solution,
+        solutionImage: problem.image2,
+        correctAnswer: problem.answer,
+        source: problem.source
+    }
+}

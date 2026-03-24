@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import MathRenderer from '@/components/MathRenderer'
 import ProblemSolver from '@/components/ProblemSolver'
 import BackButton from '@/components/BackButton'
+import { cookies } from 'next/headers'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -9,6 +10,8 @@ interface PageProps {
 
 export default async function ProblemDetailPage({ params }: PageProps) {
     const { id } = await params
+    const cookieStore = await cookies()
+    const role = cookieStore.get('osolnote_role')?.value || 'student'
 
     const { data: problem, error } = await supabase
         .from('problems')
@@ -73,7 +76,7 @@ export default async function ProblemDetailPage({ params }: PageProps) {
                     )}
 
                     <div className="mt-8 pt-8 border-t border-dashed border-gray-300 dark:border-gray-700">
-                        <ProblemSolver problemId={problem.id} />
+                        <ProblemSolver problemId={problem.id} role={role} problemData={problem} />
                     </div>
                 </div>
             </div>
