@@ -145,7 +145,10 @@ export default function ProblemSolver({ problemId, role, problemData }: ProblemS
                         )}
                         {result.correctAnswer && (
                             <div className="mt-4 space-y-2">
-                                <p><span className="font-bold">정답: {result.correctAnswer}</span></p>
+                                <div className="flex items-start gap-2">
+                                    <span className="font-bold whitespace-nowrap">정답:</span>
+                                    <MathRenderer content={result.correctAnswer} className="text-base leading-none" />
+                                </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">출처: {result.source || '미상'}</p>
                             </div>
                         )}
