@@ -40,7 +40,6 @@ export default function LoginPage() {
                                 <option value="student">학생</option>
                                 <option value="teacher">선생님</option>
                                 <option value="parents">학부모</option>
-                                <option value="admin">관리자</option>
                             </select>
                         </div>
                     )}
@@ -83,7 +82,7 @@ export default function LoginPage() {
                                 type="text"
                                 required
                                 className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
-                                placeholder="가입 코드를 입력하세요 (예: chunsang260324)"
+                                placeholder="가입 코드를 입력하세요"
                             />
                         </div>
                     )}
