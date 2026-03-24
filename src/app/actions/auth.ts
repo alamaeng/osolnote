@@ -33,6 +33,12 @@ export async function login(formData: FormData) {
         maxAge: 60 * 60 * 24 * 7, // 1 week
         path: '/',
     })
+    cookieStore.set('osolnote_role', user.role || 'student', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        path: '/',
+    })
 
     redirect('/')
 }
@@ -40,9 +46,21 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
     const username = formData.get('username') as string
     const password = formData.get('password') as string
+    const role = formData.get('role') as string
+    const signupCode = formData.get('signupCode') as string
 
-    if (!username || !password) {
-        return { error: '아이디와 비밀번호를 입력해주세요.' }
+    if (!username || !password || !role || !signupCode) {
+        return { error: '모든 항목을 입력해주세요.' }
+    }
+
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
+    const yy = String(now.getFullYear()).slice(2)
+    const mm = String(now.getMonth() + 1).padStart(2, '0')
+    const dd = String(now.getDate()).padStart(2, '0')
+    const expectedCode = `chunsang${yy}${mm}${dd}`
+
+    if (signupCode !== expectedCode) {
+        return { error: '가입 코드가 일치하지 않습니다.' }
     }
 
     // Check if user exists
@@ -59,7 +77,7 @@ export async function signup(formData: FormData) {
     // Create user
     const { error } = await supabase
         .from('users')
-        .insert([{ username, password }])
+        .insert([{ username, password, role }])
 
     if (error) {
         console.error('Signup Error:', error)
@@ -74,6 +92,12 @@ export async function signup(formData: FormData) {
         maxAge: 60 * 60 * 24 * 7, // 1 week
         path: '/',
     })
+    cookieStore.set('osolnote_role', role, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        path: '/',
+    })
 
     redirect('/')
 }
@@ -81,5 +105,6 @@ export async function signup(formData: FormData) {
 export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('osolnote_user')
+    cookieStore.delete('osolnote_role')
     redirect('/login')
 }

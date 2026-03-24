@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createProblem, updateProblem, deleteProblem, getAdminProblems, bulkCreateProblems, type ProblemInsert } from '@/app/actions/problem'
 import * as XLSX from 'xlsx'
 
@@ -21,8 +21,6 @@ type Problem = {
 }
 
 export default function AdminPage() {
-    const [password, setPassword] = useState('')
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [mode, setMode] = useState<'create' | 'list' | 'edit' | 'bulk'>('list')
     const [message, setMessage] = useState<string | null>(null)
 
@@ -33,19 +31,14 @@ export default function AdminPage() {
     // Sorting state (support multiple columns)
     const [sortConfig, setSortConfig] = useState<{ key: keyof Problem; direction: 'ascending' | 'descending' }[]>([]);
 
-    const checkPassword = () => {
-        if (password === 'anfruf88') {
-            setIsAuthenticated(true)
-            fetchProblems()
-        } else {
-            alert('비밀번호가 틀렸습니다.')
-        }
-    }
-
     async function fetchProblems() {
         const data = await getAdminProblems()
         setProblems(data)
     }
+
+    useEffect(() => {
+        fetchProblems()
+    }, [])
 
     // Bulk upload handlers
     const downloadTemplate = () => {
@@ -213,32 +206,6 @@ export default function AdminPage() {
         setEditingProblem(problem)
         setMode('edit')
         setMessage(null)
-    }
-
-    if (!isAuthenticated) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-gray-100">
-                <div className="p-8 bg-white rounded shadow-md">
-                    <h2 className="mb-4 text-xl font-bold text-black">관리자 인증</h2>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-3 py-2 mb-4 border rounded bg-white text-black"
-                        placeholder="관리자 비밀번호"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') checkPassword()
-                        }}
-                    />
-                    <button
-                        onClick={checkPassword}
-                        className="w-full px-4 py-2 text-white bg-black rounded"
-                    >
-                        확인
-                    </button>
-                </div>
-            </div>
-        )
     }
 
 

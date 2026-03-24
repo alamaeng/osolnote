@@ -22,10 +22,28 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center bg-gray-100">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md text-black">
                 <h2 className="text-2xl font-bold text-center text-gray-900">
-                    {isLogin ? 'Osolnote 로그인' : '학생 등록'}
+                    {isLogin ? 'Osolnote 로그인' : '회원가입'}
                 </h2>
 
                 <form action={handleSubmit} className="space-y-4">
+                    {!isLogin && (
+                        <div>
+                            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                                가입 유형
+                            </label>
+                            <select
+                                id="role"
+                                name="role"
+                                required
+                                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
+                            >
+                                <option value="student">학생</option>
+                                <option value="teacher">선생님</option>
+                                <option value="parents">학부모</option>
+                                <option value="admin">관리자</option>
+                            </select>
+                        </div>
+                    )}
                     <div>
                         <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                             이름 (ID)
@@ -53,6 +71,22 @@ export default function LoginPage() {
                             placeholder="비밀번호를 입력하세요"
                         />
                     </div>
+
+                    {!isLogin && (
+                        <div>
+                            <label htmlFor="signupCode" className="block text-sm font-medium text-gray-700">
+                                가입 코드
+                            </label>
+                            <input
+                                id="signupCode"
+                                name="signupCode"
+                                type="text"
+                                required
+                                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white text-black"
+                                placeholder="가입 코드를 입력하세요 (예: chunsang260324)"
+                            />
+                        </div>
+                    )}
 
                     {error && (
                         <div className="text-sm text-red-600">

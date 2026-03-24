@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
     const currentUser = request.cookies.get('osolnote_user')?.value
+    const currentRole = request.cookies.get('osolnote_role')?.value
     const { pathname } = request.nextUrl
 
     // Allow access to login page and static assets
@@ -13,6 +14,10 @@ export function middleware(request: NextRequest) {
     // Redirect to login if user is not authenticated
     if (!currentUser) {
         return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    if (pathname.startsWith('/admin') && currentRole !== 'admin' && currentRole !== 'teacher') {
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     return NextResponse.next()
