@@ -56,7 +56,7 @@ export default async function OsolnotePage() {
 
             <div className="grid gap-8">
                 {wrongProblems.map((problem) => (
-                    <div key={problem.id} className="bg-white border-2 border-red-100 rounded-xl shadow-sm overflow-hidden p-6 relative">
+                    <div key={problem.id} className="bg-white dark:bg-gray-900 border-2 border-red-100 dark:border-red-900 rounded-xl shadow-sm overflow-hidden p-6 relative">
                         <div className="absolute top-0 right-0 flex">
                             <div className="p-2">
                                 <BookmarkButton
